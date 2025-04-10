@@ -28,9 +28,9 @@ async def usd_to_sum(msg: Message, state: FSMContext):
     data = await state.get_data()
     if data and data["valyuta"] == '💲 ➡️ 🇺🇿':
         kurs = await currency_exchange("USD", "UZS")
-        await msg.answer(f"{summa} --> UZS = {summa * kurs} USZ")
+        await msg.answer(f"{summa}💲 --> UZS = {summa * kurs} 🇺🇿")
         await state.clear()
     else:
         kurs = await currency_exchange("UZS", "USD")
-        await msg.answer(f"{summa} --> USD = {summa * kurs} USD")
+        await msg.answer(f"{summa} 🇺🇿 --> USD = {summa * kurs} 💲")
         await state.clear()
