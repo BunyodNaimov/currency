@@ -1,5 +1,6 @@
 from aiogram import Router, F
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from handlers.keyboards import kb_exchange
 from utils import currency_exchange
@@ -11,11 +12,25 @@ async def command_start_handler(message: Message) -> None:
 
 
 @router.message(F.text == "💲 ➡️ 🇺🇿")
-async def enter_summa(msg: Message):
+async def enter_summa(msg: Message, state: FSMContext):
+    await state.update_data(valyuta=msg.text)
     await msg.answer("Summani kiriting: ")
 
-@router.message(F.text)
-async def usd_to_sum(msg: Message):
+
+@router.message(F.text == "🇺🇿 ➡️ 💲")
+async def uzs_enter_summa(msg: Message, state: FSMContext):
+    await state.update_data(valyuta=msg.text)
+    await msg.answer("Summani kiriting: ")
+
+@router.message(F.text.isdigit())
+async def usd_to_sum(msg: Message, state: FSMContext):
     summa = int(msg.text)
-    kurs = await currency_exchange("USD", "UZS")
-    await msg.answer(f"{summa} --> UZS = {summa * kurs} USZ")
+    data = await state.get_data()
+    if data and data["valyuta"] == '💲 ➡️ 🇺🇿':
+        kurs = await currency_exchange("USD", "UZS")
+        await msg.answer(f"{summa} --> UZS = {summa * kurs} USZ")
+        await state.clear()
+    else:
+        kurs = await currency_exchange("UZS", "USD")
+        await msg.answer(f"{summa} --> USD = {summa * kurs} USD")
+        await state.clear()
